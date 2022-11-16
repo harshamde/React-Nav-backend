@@ -1,0 +1,81 @@
+<html>
+
+<head>
+
+
+
+    <!-- <script crossorigin src="https://codingroomieresources.blob.core.windows.net/script-files/node-server.js"></script> -->
+
+    <!-- Using Babel Library  -->
+    <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+
+
+    <!-- Using React Library -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- import react router dom -->
+    <script crossorigin src='https://unpkg.com/react-router-dom@5.0.0/umd/react-router-dom.min.js'></script>
+
+
+    <!-- Using Bootstrap CSS  -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+    <div id="root"></div>
+
+
+
+</body>
+
+
+
+</html>
+
+<script type="text/babel">
+
+
+    const { NavLink, Route, BrowserRouter, Routes, HashRouter, Outlet } = ReactRouterDOM;
+
+
+
+    function AppComponent() {
+        return (
+
+            <div>
+                <NavLink to="/books">Books</NavLink>
+                &nbsp;&nbsp;
+                <NavLink to="/products">Products</NavLink>
+                <Outlet></Outlet>
+            </div>
+        );
+
+    }
+
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+
+    root.render(
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<AppComponent />}>
+                    <Route path="/books" element={<window.BooksManager />} ></Route>
+                    <Route path="/products" element={<window.ProductsManager />} ></Route>
+                </Route>
+            </Routes>
+        </BrowserRouter>);
+
+</script>
