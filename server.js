@@ -67,6 +67,37 @@ app.get("/get-products", async (request, response) => {
 });
 
 
+app.post('/save-products', async (request, response) => {
+    try {
+        const products = request.body;
+        const collection = dataBase.collection("products");
+        for (let product of products) {
+            switch (product.status) {
+                case "new & updated":
+                    delete product.status;
+                    product._id = ObjectId(product._id);
+                    await collection.insertOne(product);
+                    break;
+                case "from-server & updated":
+                    delete product.status;
+                    product._id = ObjectId(product._id);
+                    await collection.findOneAndReplace({ _id: product._id }, product);
+                    break;
+                case "from-server & deleted":
+                    delete product.status;
+                    product._id = ObjectId(product._id);
+                    await collection.deleteOne({ _id: product._id });
+                    break;
+            }
+        }
+        const updatedProducts = await collection.find().toArray();
+        response.json(updatedProducts);
+    } catch (error) {
+        console.log(error)
+    }
+});
+
+
 app.listen(3001, async () => {
     await client.connect();
     console.log("listening on port 3001");
