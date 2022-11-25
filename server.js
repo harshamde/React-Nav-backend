@@ -17,29 +17,30 @@ const createJwt = (data) => {
 };
 
 const verifyJwt = (token) => {
-    const newJwt = jwt.verify(token, SECRET_KEY_FOR_JWT, (error, decode) => {
+    return jwt.verify(token, SECRET_KEY_FOR_JWT, (error, decode) => {
         if (error) {
             console.log("error");
         } else {
-            console.log(decode);
+            return true;
         }
     });
 }
 
 
 app.get("/get-books", async (request, response) => {
-
-    // const token = request.headers.authorization.split("Bearer")[1];
-    // // console.log(token);
-    // verifyJwt(token);
     try {
-        const collection = dataBase.collection('books');
-        const books = await collection.find().toArray();
-        setTimeout(() => {
-            response.json(books);
-        }, 2000);
+        const token = request.headers.authorization.split("Bearer")[1];
+        if (verifyJwt(token)) {
+            const collection = dataBase.collection('books');
+            const books = await collection.find().toArray();
+            setTimeout(() => {
+                response.json(books);
+            }, 2000);
+        } else {
+            response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
+        }
     } catch (error) {
-        console.log(error);
+        response.json({ status: "FAILED", error: "Server error", message: "Internal server error" }).status(500);
     }
 });
 
@@ -81,7 +82,6 @@ app.get("/get-products", async (request, response) => {
     try {
         const collection = dataBase.collection('products');
         const products = await collection.find().toArray();
-        console.log(products);
         setTimeout(() => {
             response.json(products);
         }, 2000);
@@ -159,7 +159,7 @@ app.post('/login', async (request, response) => {
         const jwtToken = createJwt(dataToCreateJwt);
         response.json({ status: "SUCCESS", jwtToken, message: "Login successful." });
     } catch (error) {
-        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).statusCode(500);
+        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).status(500);
     }
 });
 
@@ -194,7 +194,7 @@ app.post('/register', async (request, response) => {
         response.json({ status: "SUCCESS", message: "Registered successfully." });
 
     } catch (error) {
-        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).statusCode(500);
+        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).status(500);
     }
 });
 
