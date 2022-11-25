@@ -11,15 +11,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const createJwt = () => {
-    const newJwt = jwt.sign(
-        {
-            username: "aaa",
-            password: "aaa123#",
-        },
-        SECRET_KEY_FOR_JWT,
-        { expiresIn: '1h' }
-    );
+const createJwt = (data) => {
+    // data is an object containing username and userId
+    return jwt.sign(data, SECRET_KEY_FOR_JWT, { expiresIn: '1h' });
 };
 
 const verifyJwt = (token) => {
@@ -129,6 +123,46 @@ app.post('/save-products', async (request, response) => {
     }
 });
 
+app.post('/login', async (request, response) => {
+    try {
+        const { username, password } = request.body;
+        if (username.length < 3) {
+            response.json({ status: "FAILED", error: "Validation error", message: "Username should have at least 3 characters." });
+            return;
+        }
+        if (password.length < 6) {
+            response.json({ status: "FAILED", error: "Validation error", message: "Password should have at least 6 characters." });
+            return;
+        }
+
+        const collection = dataBase.collection("users");
+        const userdata = await collection.findOne({ username });
+
+        if (userdata === null) {
+            response.json({ status: "FAILED", error: "Login error", message: "User does not exist.Please register first" });
+            return;
+        }
+
+        const hashFromDb = userdata.password;
+        const doesPasswordMatch = await bcrypt.compare(password, hashFromDb);
+        if (!doesPasswordMatch) {
+            response.json({ status: "FAILED", error: "Login error", message: "Invalid password" });
+            return;
+        }
+        // if password matched create jwt and send back to user
+
+        const dataToCreateJwt = {
+            username,
+            userId: userdata._id
+        };
+
+        const jwtToken = createJwt(dataToCreateJwt);
+        response.json({ status: "SUCCESS", jwtToken, message: "Login successful." });
+    } catch (error) {
+        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).statusCode(500);
+    }
+});
+
 
 app.post('/register', async (request, response) => {
     try {
@@ -149,18 +183,18 @@ app.post('/register', async (request, response) => {
         const collection = dataBase.collection("users");
         const usernameExist = await collection.findOne({ username });
 
-        if (usernameExist) {
-            response.json({ status: "FAILED", error: "Validation error", message: "Username already exist." });
+        if (usernameExist !== null) {
+            response.json({ status: "FAILED", error: "Registration error", message: "Username already exist." });
             return;
         }
 
         const hash = await bcrypt.hash(password, saltRounds);
 
         await collection.insertOne({ username, password: hash });
-        response.json({ status: "SUCCESS", message: "Registered successfully."});
+        response.json({ status: "SUCCESS", message: "Registered successfully." });
 
     } catch (error) {
-        response.json(error);
+        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).statusCode(500);
     }
 });
 
