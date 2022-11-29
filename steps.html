@@ -1,0 +1,436 @@
+<div class="javascript-code">
+    <p class="text text-secondary">// write code here</p>
+</div>
+<div class="javascript-code">
+    <div class="code-indent-1">const express = require('express');</div>
+    <div class="code-indent-1">const app = express();</div>
+</div>
+
+<div class="code-indent-1 ">
+    const { mongoClient<span class="">,ObjectId }</span>} = require('mongodb');
+</div>
+
+<div class="code-indent-1 ">
+    const client = mongoClient(<span class="">'mongodb://127.0.0.1:27017'</span>);
+</div>
+<div class="code-indent-1 ">
+    <span class="">const database = </span>client.db('tempdb');
+</div>
+
+<div class="code-indent-1 ">
+    const cors = require('cors');
+</div>
+
+<div class="code-indent-1 hide" data-${stepsToAddForValidations}="">
+    const bcrypt = require("bcrypt");
+</div>
+
+<div class="code-indent-1 hide" data-${stepsToAddForJWT}="">
+    const jwt = require('jsonwebtoken');
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForValidations}="">
+    const saltRounds = 10;
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+    const SECRET_KEY_FOR_JWT = "jsonPass123"
+</div>
+
+<div class="code-indent-1">
+    <br />
+    app.use(express.static('public'));
+</div>
+
+<div class="code-indent-1 ">
+    app.use(cors());
+</div>
+
+<div class="code-indent-1 ">
+    app.use(express.json());
+</div>
+
+<br />
+<div class="code-indent-1">
+    app.use(function (request, response, next) {
+
+    <div class="code-indent-1">setTimeout(() => { next() }, 2000);</div>
+
+    });
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+    <br />
+    const createJwt = (data) => {
+    <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+        return jwt.sign(<span class="hide" data-${++stepsToAddForJWT}="">data</span><span class="hide"
+            data-${++stepsToAddForJWT}="">, SECRET_KEY_FOR_JWT</span><span class="hide" data-${++stepsToAddForJWT}="">,
+            { expiresIn: '24h' }</span>);
+    </div>
+    };
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+    <br />
+    const verifyJwt = (token) => {
+    <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+        return jwt.verify(<span class="hide" data-${++stepsToAddForJWT}="">token</span><span class="hide"
+            data-${++stepsToAddForJWT}="">, SECRET_KEY_FOR_JWT</span><span class="hide" data-${++stepsToAddForJWT}="">,
+            (error, decode) => {
+            <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">if(error){
+                <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">return false;</div>
+                }else{
+                <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">return true;</div>
+                }
+            </div>
+            }
+        </span>);
+    </div>
+    };
+</div>
+
+<div class="code-indent-1">
+    <br />
+    app.get(
+    <span class=""> '/get-books',</span>
+    <span class="">
+        <span class=""> async</span> (
+        <span class=""> request,response </span>
+        )&nbsp;=>&nbsp;{
+
+        <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+            const token = request.headers.authorization.split("Bearer")[1];
+        </div>
+
+        <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+            if (verifyJwt(token)) {
+        </div>
+
+        <div class="code-indent-1">
+            <span class="">const collection = </span>database.collection('books');
+        </div>
+        <div class="code-indent-1 ">
+            <span class="">const books = </span>await collection.find().toArray();
+        </div>
+        <div class="code-indent-1">
+            response.json(
+            <span class="">books</span>
+            );
+        </div>
+
+        <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+            else{
+            <div class="hide code-indent-1" data-${++stepsToAddForJWT}="">response.json({<span class="hide"
+                    data-${++stepsToAddForJWT}="">status: "FAILED"</span><span class="hide"
+                    data-${++stepsToAddForJWT}="">, error:"Authentication error.Invalid jwt"</span><span class="hide"
+                    data-${++stepsToAddForJWT}="">, message:"Authentication error."</span>});
+            </div>
+            }
+        </div>
+
+        }
+    </span>
+    );
+</div>
+
+<div class="code-indent-1">
+    <br />
+    app.get(
+    <span class=""> '/get-products', </span>
+    <span class="">
+        <span class=""> async</span> (
+        <span class=""> request,response </span>
+        )&nbsp;=>&nbsp;{
+
+        <div class="code-indent-1 ">
+            <span class="">const collection = </span>database.collection('products');
+        </div>
+        <div class="code-indent-1 ">
+            <span class="">const products = </span>await collection.find();
+        </div>
+        <div class="code-indent-1">
+            response.json(
+            <span class="">products</span>
+            );
+        </div>
+
+        }
+    </span>
+    );
+</div>
+<br />
+
+<div class="code-indent-1 ">
+    app.post(<span class="">'/save-books'</span><span class="">, async(<span class="">request, response</span>) => {
+        <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+            const token = request.headers.authorization.split("Bearer")[1];
+        </div>
+
+        <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+            if (!verifyJwt(token)) {
+            <div class="hide code-indent-1" data-${++stepsToAddForJWT}="">response.json({<span class="hide"
+                    data-${++stepsToAddForJWT}="">status: "FAILED"</span><span class="hide"
+                    data-${++stepsToAddForJWT}="">, error:"Authentication error.Invalid jwt"</span><span class="hide"
+                    data-${++stepsToAddForJWT}="">, message:"Authentication error."</span>});
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForJWT}="">return;</div>
+            }
+        </div>
+        <div class="code-indent-1 ">
+            const books = request.body;
+        </div>
+        <div class="code-indent-1 ">
+            const collection = dataBase.collection("books");
+        </div>
+        <div class="code-indent-1 ">
+            for (let book of books) {
+            <div class="code-indent-1 ">
+                switch (book.status) {
+                <div class="code-indent-1 ">
+                    case "new & updated":
+                </div>
+                <div class="code-indent-2 ">
+                    delete book.status;
+                </div>
+                <div class="code-indent-2 ">
+                    book._id = ObjectId(<span class="">book._id</span>);
+                </div>
+                <div class="code-indent-2 ">
+                    await collection.insertOne(<span class="">book</span>);
+                    <br />
+                    break;
+                </div>
+
+                <div class="code-indent-1 ">
+                    case "from-server & updated":
+                </div>
+                <div class="code-indent-2 ">
+                    delete book.status;
+                </div>
+                <div class="code-indent-2 ">
+                    book._id = ObjectId(book._id);
+                </div>
+                <div class="code-indent-2 ">
+                    await collection.findOneAndReplace(<span class="">{ _id: book._id }, book</span>);
+                    <br />
+                    break;
+                </div>
+
+                <div class="code-indent-1 ">
+                    case "from-server & deleted":
+                </div>
+                <div class="code-indent-2 ">
+                    delete book.status;
+                </div>
+                <div class="code-indent-2 ">
+                    book._id = ObjectId(book._id);
+                </div>
+                <div class="code-indent-2 ">
+                    await collection.deleteOne(<span class="">{ _id: book._id }</span>);
+                    <br />
+                    break;
+                </div>
+                }
+            </div>
+            <div class="code-indent-1 ">
+                const updatedBooks = await collection.find().toArray();
+            </div>
+
+            <div class="code-indent-1 ">
+                response.json(updatedBooks);
+            </div>
+            }
+        </div>
+
+        }
+    </span>);
+</div><br />
+
+<div class="code-indent-1 hide" data-${++stepsToAddForValidations}="">
+    app.post(<span class="hide" data-${++stepsToAddForValidations}="">'/register',</span>
+    <span class="hide" data-${++stepsToAddForValidations}="">async(request, response)=>{
+        <div class="code-indent-1 hide" data-${++stepsToAddForValidations}="">try{
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+                const {username, password, confirmPassword} = request.body;
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (username.length < 3){ <div
+                    class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+                        data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+                        data-${++stepsToAddForValidations}="">, error:"Validation error"</span><span class="hide"
+                        data-${++stepsToAddForValidations}="">, message:"Username should have at least 3
+                        characters."</span>});
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+            }
+        </div>
+
+        <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (password !== confirmPassword){
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+                    data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, error:"Validation error"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, message:"Password and confirm password should be
+                    same."</span>});
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+            }
+        </div>
+
+        <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (password.length < 6){ <div
+                class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+                    data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, error:"Validation error"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, message:"Password should have at least 6
+                    characters."</span>});
+        </div>
+        <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+        }
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">const collection = dataBase.collection(<span
+        class="hide" data-${++stepsToAddForValidations}="">"users"</span>);
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">const usernameExist = await
+    collection.findOne({username});
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (usernameExist){
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+            data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, error:"Registration error"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, message:"Username already exist."</span>});
+    </div>
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+    }
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+    const hash = await bcrypt.hash(<span class="hide" data-${++stepsToAddForValidations}="">password,
+        saltRounds</span>);
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+    await collection.insertOne(<span class="hide" data-${++stepsToAddForValidations}="">{username,
+        password:hash}</span>);
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+        data-${++stepsToAddForValidations}="">status: "SUCCESS"</span><span class="hide"
+        data-${++stepsToAddForValidations}="">, message:"Registered successful."</span>});
+</div>
+
+}catch(error){
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+        data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+        \data-${++stepsToAddForValidations}="">, error:"Server error"</span><span class="hide"
+        data-${++stepsToAddForValidations}="">, message:"Internal server error."</span>});
+</div>
+}</div>
+}</span>);
+</div><br />
+
+<div class="code-indent-1 hide" data-${++stepsToAddForValidations}="">
+    app.post(<span class="hide" data-${++stepsToAddForValidations}="">'/login',</span>
+    <span class="hide" data-${++stepsToAddForValidations}="">async(request, response)=>{
+        <div class="code-indent-1 hide" data-${++stepsToAddForValidations}="">try{
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+                const {username, password} = request.body;
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (username.length < 3){ <div
+                    class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+                        data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+                        data-${++stepsToAddForValidations}="">, error:"Validation error"</span><span class="hide"
+                        data-${++stepsToAddForValidations}="">, message:"Username should have at least 3
+                        characters."</span>});
+            </div>
+            <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+            }
+        </div>
+
+        <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (password.length < 6){ <div
+                class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+                    data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, error:"Validation error"</span><span class="hide"
+                    data-${++stepsToAddForValidations}="">, message:"Password should have at least 6
+                    characters."</span>});
+        </div>
+        <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+        }
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">const collection = dataBase.collection(<span
+        class="hide" data-${++stepsToAddForValidations}="">"users"</span>);
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">const userData = await
+    collection.findOne({username});
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (userData === null){
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+            data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, error:"Login error"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, message:"User does not exist.Please register first."</span>});
+    </div>
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+    }
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+    const hashFromDb = userData.password;
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">
+    const doesPasswordMatch = await bcrypt.compare(<span class="hide" data-${++stepsToAddForValidations}="">password,
+        hashFromDb</span>);
+</div>
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">if (!doesPasswordMatch){
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+            data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, error:"Login error"</span><span class="hide"
+            data-${++stepsToAddForValidations}="">, message:"Invalid password."</span>});
+    </div>
+    <div class="hide code-indent-1" data-${++stepsToAddForValidations}="">return;</div>
+    }
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+    const dataToCreateJwt = {
+    <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">username,</div>
+    <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">userId: userData._id</div>
+    };
+</div>
+
+<div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
+    const jwtToken = createJwt(dataToCreateJwt);
+</div>
+
+
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+        data-${++stepsToAddForValidations}="">status: "SUCCESS"</span><span class="hide"
+        data-${++stepsToAddForValidations}="">, message:"Login successful."</span><span class="hide"
+        data-${++stepsToAddForJWT}="">,jwtToken</span>});
+</div>
+
+}catch(error){
+<div class="hide code-indent-1" data-${++stepsToAddForValidations}="">response.json({<span class="hide"
+        data-${++stepsToAddForValidations}="">status: "FAILED"</span><span class="hide"
+        data-${++stepsToAddForValidations}="">, error:"Server error"</span><span class="hide"
+        data-${++stepsToAddForValidations}="">, message:"Internal server error."</span>});
+</div>
+}
+</div>
+}</span>);
+</div>
+
+<div class="code-indent-1">
+    <br />
+    app.listen(80, async() => {
+    <div class="code-indent-1">
+        await client.connect();
+        <br />
+        console.log('Listening on port 80');
+    </div>
+    });
+</div>

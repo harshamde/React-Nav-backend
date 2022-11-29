@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const client = new MongoClient('mongodb://localhost:27017');
 const dataBase = client.db('db1');
-const SECRET_KEY_FOR_JWT = "jsonWebToken12uanjd565";
+const SECRET_KEY_FOR_JWT = "jsonPass123";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,12 +19,12 @@ const createJwt = (data) => {
 const verifyJwt = (token) => {
     return jwt.verify(token, SECRET_KEY_FOR_JWT, (error, decode) => {
         if (error) {
-            console.log("error");
+            return false;
         } else {
             return true;
         }
     });
-}
+};
 
 
 app.get("/get-books", async (request, response) => {
@@ -47,6 +47,11 @@ app.get("/get-books", async (request, response) => {
 
 app.post('/save-books', async (request, response) => {
     try {
+        const token = request.headers.authorization.split("Bearer")[1];
+        if (!verifyJwt(token)) {
+            response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
+            return;
+        }
         const books = request.body;
         const collection = dataBase.collection("books");
         for (let book of books) {
@@ -136,14 +141,14 @@ app.post('/login', async (request, response) => {
         }
 
         const collection = dataBase.collection("users");
-        const userdata = await collection.findOne({ username });
+        const userData = await collection.findOne({ username });
 
-        if (userdata === null) {
+        if (userData === null) {
             response.json({ status: "FAILED", error: "Login error", message: "User does not exist.Please register first" });
             return;
         }
 
-        const hashFromDb = userdata.password;
+        const hashFromDb = userData.password;
         const doesPasswordMatch = await bcrypt.compare(password, hashFromDb);
         if (!doesPasswordMatch) {
             response.json({ status: "FAILED", error: "Login error", message: "Invalid password" });
@@ -153,13 +158,13 @@ app.post('/login', async (request, response) => {
 
         const dataToCreateJwt = {
             username,
-            userId: userdata._id
+            userId: userData._id
         };
 
         const jwtToken = createJwt(dataToCreateJwt);
-        response.json({ status: "SUCCESS", jwtToken, message: "Login successful." });
+        response.json({ status: "SUCCESS",jwtToken, message: "Login successful." });
     } catch (error) {
-        response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).status(500);
+        response.json({ status: "FAILED", error: "Server error", message: "Internal serer error." }).status(500);
     }
 });
 
