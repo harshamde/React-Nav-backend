@@ -17,28 +17,28 @@ const createJwt = (data) => {
 };
 
 const verifyJwt = (token) => {
-    return jwt.verify(token, SECRET_KEY_FOR_JWT, (error, decode) => {
-        if (error) {
-            return false;
-        } else {
-            return true;
-        }
-    });
+    // return jwt.verify(token, SECRET_KEY_FOR_JWT, (error, decode) => {
+    //     // if (error) {
+    //     //     return false;
+    //     // } else {
+    //     // }
+    // });
+    return true;
 };
 
 
 app.get("/get-books", async (request, response) => {
     try {
-        const token = request.headers.authorization.split("Bearer")[1];
-        if (verifyJwt(token)) {
-            const collection = dataBase.collection('books');
-            const books = await collection.find().toArray();
-            setTimeout(() => {
-                response.json(books);
-            }, 2000);
-        } else {
-            response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
-        }
+        // const token = request.headers.authorization.split("Bearer")[1];
+        const collection = dataBase.collection('books');
+        const books = await collection.find().toArray();
+        setTimeout(() => {
+            response.json(books);
+        }, 2000);
+        // if (verifyJwt(token)) {
+        // } else {
+        //     response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
+        // }
     } catch (error) {
         response.json({ status: "FAILED", error: "Server error", message: "Internal server error" }).status(500);
     }
@@ -47,11 +47,11 @@ app.get("/get-books", async (request, response) => {
 
 app.post('/save-books', async (request, response) => {
     try {
-        const token = request.headers.authorization.split("Bearer")[1];
-        if (!verifyJwt(token)) {
-            response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
-            return;
-        }
+        // const token = request.headers.authorization.split("Bearer")[1];
+        // if (!verifyJwt(token)) {
+        //     response.json({ status: "FAILED", error: "Authentication error.Invalid jwt", message: "Authentication error" }).status(403);
+        //     return;
+        // }
         const books = request.body;
         const collection = dataBase.collection("books");
         for (let book of books) {
@@ -162,7 +162,7 @@ app.post('/login', async (request, response) => {
         };
 
         const jwtToken = createJwt(dataToCreateJwt);
-        response.json({ status: "SUCCESS",jwtToken, message: "Login successful." });
+        response.json({ status: "SUCCESS", message: "Login successful." });
     } catch (error) {
         response.json({ status: "FAILED", error: "Server error", message: "Internal serer error." }).status(500);
     }
