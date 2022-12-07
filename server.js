@@ -193,6 +193,10 @@ app.post('/register', async (request, response) => {
             return;
         }
 
+        const isVerified = await verifyCaptchaAsync(req.body.token);
+
+
+
         const hash = await bcrypt.hash(password, saltRounds);
 
         await collection.insertOne({ username, password: hash });
@@ -202,6 +206,24 @@ app.post('/register', async (request, response) => {
         response.json({ status: "FAILED", error: "Server error", message: "internal serer error." }).status(500);
     }
 });
+
+async function verifyCaptchaAsync(token) {
+    const SECRET_KEY = "6Lc5HEYjAAAAALCas0sYp7k0D8puyUWduVrrBGo0";
+    const verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + SECRET_KEY + "&response=" + token;
+
+    return new Promise((resolve, reject) => {
+        request(verificationUrl, function (error, response, body) {
+            body = JSON.parse(body);
+            if (body.success !== undefined && body.success) {
+                resolve(true);
+            } else {
+                resolve(false);
+
+            }
+        });
+    });
+
+}
 
 
 app.listen(3001, async () => {
