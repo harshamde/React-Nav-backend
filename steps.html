@@ -1,3 +1,5 @@
+<!-- let stepsToAddForJWT = 297 -->
+
 <div class="javascript-code">
     <p class="text text-secondary">// write code here</p>
 </div>
@@ -22,7 +24,7 @@
 </div>
 
 <div class="code-indent-1 hide" data-${stepsToAddForValidations}="">
-    const bcrypt = require("bcrypt");
+    const bcrypt = require('bcrypt');
 </div>
 
 <div class="code-indent-1 hide" data-${stepsToAddForJWT}="">
@@ -34,7 +36,7 @@
 </div>
 
 <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
-    const SECRET_KEY_FOR_JWT = "jsonPass123"
+    const SECRET_KEY_FOR_JWT = 'jsonPass123'
 </div>
 
 <div class="code-indent-1">
@@ -119,7 +121,7 @@
         </div>
 
         <div class="code-indent-1 hide" data-${++stepsToAddForJWT}="">
-            else{
+            }else{
             <div class="hide code-indent-1" data-${++stepsToAddForJWT}="">response.json({<span class="hide"
                     data-${++stepsToAddForJWT}="">status: "FAILED"</span><span class="hide"
                     data-${++stepsToAddForJWT}="">, error:"Authentication error.Invalid jwt"</span><span class="hide"
@@ -434,3 +436,44 @@
     </div>
     });
 </div>
+
+<!-- STEPS 
+"const jwt = require('jsonwebtoken');",
+"const SECRET_KEY_FOR_JWT = 'jsonPass123'",
+"const createJwt =(data)=>{};",
+"return jwt.sign();",
+"data",
+", SECRET_KEY_FOR_JWT",
+"{expiresIn:'24h'}",
+"const verifyJwt =(token)=>{};",
+"return jwt.verify();",
+"token",
+", SECRET_KEY_FOR_JWT",
+",(error, decode)=>{}",
+"if(error){}else{}",
+"return false",
+"return true",
+"const token = request.headers.authorization.split("Bearer")[1];",
+"if(verifyJwt(token)){",
+"}else{}",
+"response.json({});",
+"status: \"FAILED\"",
+", error:\"Authentication error.Invalid jwt\"",
+", message:\"Authentication error.\"",
+"const token = request.headers.authorization.split("Bearer")[1];",
+"if(!verifyJwt(token)){}",
+"response.json({});",
+"status: \"FAILED\"",
+", error:\"Authentication error.Invalid jwt\"",
+", message:\"Authentication error.\"",
+"return;",
+"const dataToCreateJwt={};",
+"username,",
+"userId:userData._id",
+"const jwtToken = createJwt(dataToCreateJwt);",
+",jwtToken",
+
+
+
+
+ -->
